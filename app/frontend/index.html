@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Wonder Knowledge Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0f1115;
+        --panel: rgba(22, 25, 32, 0.78);
+        --panel-light: rgba(255, 255, 255, 0.84);
+        --text: #f8fafc;
+        --muted: #a1a9bb;
+        --accent: #6c5ce7;
+        --accent-soft: rgba(108, 92, 231, 0.14);
+        --success: #2dd4bf;
+        --danger: #f87171;
+        --border: rgba(148, 163, 184, 0.2);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top left, #1e2230 0%, #090b11 60%, #05070b 100%);
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+      }
+
+      #root {
+        flex: 1;
+        display: flex;
+      }
+
+      .workspace {
+        display: grid;
+        grid-template-columns: 320px 1fr 320px;
+        gap: 18px;
+        width: 100%;
+        padding: 18px;
+      }
+
+      .panel {
+        background: var(--panel);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .panel.light {
+        background: var(--panel-light);
+        color: #111827;
+      }
+
+      .panel h2,
+      .panel h3 {
+        margin: 0;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+
+      .panel-header {
+        padding: 20px 22px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .panel-body {
+        padding: 18px 22px 22px;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .scroll-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .chat-stream {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .chat-message {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 12px;
+        align-items: flex-start;
+        background: rgba(15, 17, 24, 0.55);
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 18px;
+        padding: 14px 18px;
+      }
+
+      .chat-message.user {
+        background: rgba(108, 92, 231, 0.12);
+      }
+
+      .avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(108, 92, 231, 0.8), rgba(130, 89, 242, 0.5));
+        display: grid;
+        place-items: center;
+        font-weight: 600;
+        color: white;
+      }
+
+      .avatar.user {
+        background: linear-gradient(135deg, rgba(15, 136, 235, 0.8), rgba(23, 202, 255, 0.5));
+      }
+
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .message-role {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      .message-body {
+        line-height: 1.6;
+        font-size: 14.8px;
+        white-space: pre-wrap;
+      }
+
+      .message-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .pill {
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+      }
+
+      .composer {
+        border-top: 1px solid var(--border);
+        padding: 18px 22px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .composer textarea {
+        width: 100%;
+        min-height: 90px;
+        resize: vertical;
+        border-radius: 14px;
+        padding: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(12, 14, 21, 0.8);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 15px;
+      }
+
+      .composer textarea:focus {
+        outline: 2px solid rgba(108, 92, 231, 0.4);
+      }
+
+      .composer-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .button {
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        background: rgba(108, 92, 231, 0.9);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 24px rgba(108, 92, 231, 0.3);
+      }
+
+      .button.secondary {
+        background: rgba(148, 163, 184, 0.15);
+        color: var(--muted);
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      input,
+      select,
+      textarea,
+      .fake-input {
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 17, 24, 0.75);
+        color: var(--text);
+        padding: 10px 12px;
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: 2px solid rgba(108, 92, 231, 0.35);
+      }
+
+      .tool-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+      }
+
+      .tool-card {
+        border-radius: 16px;
+        padding: 14px;
+        background: rgba(108, 92, 231, 0.08);
+        border: 1px solid rgba(108, 92, 231, 0.25);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        cursor: pointer;
+        transition: transform 0.18s ease, background 0.18s ease;
+      }
+
+      .tool-card:hover {
+        transform: translateY(-2px);
+        background: rgba(108, 92, 231, 0.14);
+      }
+
+      .tool-card h4 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .tool-card p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .section-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin: 12px 0 6px;
+      }
+
+      .session-card,
+      .curriculum-card,
+      .share-card {
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .session-card h4,
+      .curriculum-card h4,
+      .share-card h4 {
+        margin: 0;
+        font-size: 15px;
+      }
+
+      .session-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        background: rgba(45, 212, 191, 0.1);
+        color: var(--success);
+        border-radius: 999px;
+        padding: 4px 10px;
+        width: fit-content;
+      }
+
+      .map-panel {
+        position: relative;
+        height: 320px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 30% 20%, rgba(108, 92, 231, 0.35), transparent 60%),
+          radial-gradient(circle at 70% 60%, rgba(45, 212, 191, 0.35), transparent 70%),
+          rgba(13, 16, 24, 0.55);
+        border: 1px solid rgba(108, 92, 231, 0.25);
+        overflow: hidden;
+      }
+
+      .map-node {
+        position: absolute;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: rgba(15, 17, 24, 0.8);
+        border: 1px solid rgba(108, 92, 231, 0.4);
+        font-size: 12px;
+        text-transform: capitalize;
+        box-shadow: 0 8px 24px rgba(15, 17, 24, 0.6);
+      }
+
+      .map-connector {
+        position: absolute;
+        background: linear-gradient(90deg, rgba(108, 92, 231, 0.3), rgba(23, 200, 255, 0.3));
+        height: 2px;
+        transform-origin: left center;
+      }
+
+      .match-card {
+        border-radius: 16px;
+        padding: 12px 14px;
+        background: rgba(15, 136, 235, 0.12);
+        border: 1px solid rgba(23, 200, 255, 0.28);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .match-card strong {
+        font-size: 14px;
+      }
+
+      .match-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .match-tags span {
+        font-size: 12px;
+        background: rgba(255, 255, 255, 0.12);
+        padding: 4px 8px;
+        border-radius: 999px;
+      }
+
+      .attachment-box {
+        border: 1px dashed rgba(148, 163, 184, 0.35);
+        border-radius: 14px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .attachment-box input {
+        opacity: 0;
+        position: absolute;
+        inset: 0;
+        cursor: pointer;
+      }
+
+      .attachment-wrapper {
+        position: relative;
+        width: 100%;
+      }
+
+      .attachment-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .attachment-chip {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .mobile-banner {
+        display: none;
+        margin-bottom: 12px;
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(23, 200, 255, 0.15);
+        border: 1px solid rgba(23, 200, 255, 0.3);
+        font-size: 13px;
+        color: #e0f2fe;
+      }
+
+      @media (max-width: 1180px) {
+        .workspace {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: auto auto auto;
+        }
+
+        .sidebar-left,
+        .sidebar-right {
+          order: 2;
+        }
+
+        .chat-panel {
+          order: 1;
+        }
+
+        .mobile-banner {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useEffect, useMemo, useState } = React;
+
+      const API = {
+        async json(path, options = {}) {
+          const response = await fetch(path, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+          });
+          if (!response.ok) {
+            const detail = await response.json().catch(() => ({ detail: response.statusText }));
+            throw new Error(detail.detail || response.statusText);
+          }
+          return response.json();
+        },
+      };
+
+      const withDefault = (value, fallback) => {
+        if (value === undefined || value === null) {
+          return fallback;
+        }
+        return value;
+      };
+
+      function MobileBanner() {
+        return (
+          <div className="mobile-banner">
+            Optimised for touch. Save to home screen to keep Wonder Knowledge on standby for your sessions,
+            quizzes, and idea jams.
+          </div>
+        );
+      }
+
+      function ChatMessage({ entry }) {
+        const isUser = entry.role === 'user';
+        return (
+          <div className={`chat-message ${isUser ? 'user' : ''}`}>
+            <div className={`avatar ${isUser ? 'user' : ''}`}>{isUser ? 'You' : 'WK'}</div>
+            <div>
+              <div className="message-header">
+                <span className="message-role">{isUser ? 'Learner' : entry.flair || 'Navigator'}</span>
+                <span className="pill">{entry.timestamp}</span>
+              </div>
+              <div className="message-body">{entry.content}</div>
+              {entry.tags && entry.tags.length ? (
+                <div className="message-tags">
+                  {entry.tags.map((tag) => (
+                    <span key={tag} className="pill">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        );
+      }
+
+      function KnowledgeTree({ nodes, relationships }) {
+        const layout = useMemo(() => {
+          if (!nodes.length) return [];
+          const radius = 120;
+          const centerX = 50;
+          const centerY = 50;
+          return nodes.map((node, index) => {
+            const angle = (index / nodes.length) * Math.PI * 2;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            return {
+              node,
+              x: `${Math.max(8, Math.min(92, x / 2))}%`,
+              y: `${Math.max(6, Math.min(92, y / 1.8))}%`,
+            };
+          });
+        }, [nodes]);
+
+        return (
+          <div className="map-panel">
+            {layout.map(({ node, x, y }) => (
+              <div key={node.name} className="map-node" style={{ left: x, top: y }}>
+                {node.name}
+              </div>
+            ))}
+            {relationships.map((edge, idx) => {
+              const source = layout.find((item) => item.node.name === edge.source);
+              const target = layout.find((item) => item.node.name === edge.target);
+              if (!source || !target) return null;
+              const x1 = parseFloat(source.x);
+              const y1 = parseFloat(source.y);
+              const x2 = parseFloat(target.x);
+              const y2 = parseFloat(target.y);
+              const dx = x2 - x1;
+              const dy = y2 - y1;
+              const length = Math.sqrt(dx * dx + dy * dy);
+              const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+              return (
+                <div
+                  key={`${edge.source}-${edge.target}-${idx}`}
+                  className="map-connector"
+                  style={{
+                    left: `${x1}%`,
+                    top: `${y1}%`,
+                    width: `${length}%`,
+                    transform: `rotate(${angle}deg)`,
+                  }}
+                />
+              );
+            })}
+          </div>
+        );
+      }
+
+      function SessionPanel({ sessions }) {
+        return (
+          <div className="scroll-stack">
+            {sessions.map((session) => (
+              <div key={session.id} className="session-card">
+                <div className="session-status">{session.status.toUpperCase()}</div>
+                <h4>{session.name}</h4>
+                <p>{session.description}</p>
+                <div className="match-tags">
+                  {session.focus_tags.map((tag) => (
+                    <span key={tag}>#{tag}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+            {!sessions.length && <p>No sessions yet. Draft one to anchor your focus.</p>}
+          </div>
+        );
+      }
+
+      function CurriculumPanel({ curricula }) {
+        return (
+          <div className="scroll-stack">
+            {curricula.map((item) => (
+              <div key={item.id} className="curriculum-card">
+                <h4>{item.title}</h4>
+                <p>{item.description}</p>
+                <div className="match-tags">
+                  {item.tags.map((tag) => (
+                    <span key={tag}>#{tag}</span>
+                  ))}
+                </div>
+                {item.source_url && (
+                  <a href={item.source_url} target="_blank" rel="noreferrer" className="button secondary" style={{ width: 'fit-content' }}>
+                    Open source
+                  </a>
+                )}
+              </div>
+            ))}
+            {!curricula.length && <p>Upload a curriculum or outline to steer the knowledge graph.</p>}
+          </div>
+        );
+      }
+
+      function SharePanel({ shares }) {
+        return (
+          <div className="scroll-stack">
+            {shares.map((share) => (
+              <div key={share.id} className="share-card">
+                <div className="message-header" style={{ marginBottom: 0 }}>
+                  <h4>{share.title}</h4>
+                  <span className="pill">{share.visibility}</span>
+                </div>
+                <p>{share.summary}</p>
+                <div className="match-tags">
+                  {share.tags.map((tag) => (
+                    <span key={tag}>#{tag}</span>
+                  ))}
+                </div>
+                <small>by {share.author}</small>
+              </div>
+            ))}
+            {!shares.length && <p>No shares yet. Publish your current thought-line to invite collaborators.</p>}
+          </div>
+        );
+      }
+
+      function MatchPanel({ matches }) {
+        return (
+          <div className="scroll-stack">
+            {matches.map((match) => (
+              <div key={match.share.id} className="match-card">
+                <strong>{match.share.title}</strong>
+                <span>by {match.share.author}</span>
+                <div className="match-tags">
+                  {match.shared_tags.map((tag) => (
+                    <span key={`shared-${tag}`}>#{tag}</span>
+                  ))}
+                </div>
+                {match.complementary_tags.length ? (
+                  <p style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                    Complements you with {match.complementary_tags.map((tag) => `#${tag}`).join(' ')}
+                  </p>
+                ) : null}
+                <span className="pill">Affinity {Math.round(match.affinity * 100)}%</span>
+              </div>
+            ))}
+            {!matches.length && <p>No suggestions yet. Publish a share or invite a collaborator.</p>}
+          </div>
+        );
+      }
+
+      function ToolForm({ type, onSubmit, options }) {
+        const [state, setState] = useState(() => {
+          if (options && options.initial) {
+            return options.initial;
+          }
+          return {};
+        });
+        const [status, setStatus] = useState(null);
+
+        const handleChange = (event) => {
+          const { name, value } = event.target;
+          setState((prev) => ({ ...prev, [name]: value }));
+        };
+
+        const handleMulti = (event) => {
+          const { name, value } = event.target;
+          setState((prev) => ({ ...prev, [name]: value.split(',').map((v) => v.trim()).filter(Boolean) }));
+        };
+
+        const handleSubmit = async (event) => {
+          event.preventDefault();
+          setStatus('Working...');
+          try {
+            await onSubmit(state);
+            setStatus('Saved!');
+            setTimeout(() => setStatus(null), 1500);
+            if (!(options && options.keepValues)) {
+              if (options && options.initial) {
+                setState(options.initial);
+              } else {
+                setState({});
+              }
+            }
+          } catch (error) {
+            setStatus(error.message || 'Failed');
+          }
+        };
+
+        switch (type) {
+          case 'concept':
+            return (
+              <form onSubmit={handleSubmit}>
+                <label>Name</label>
+                <input name="name" value={withDefault(state.name, '')} onChange={handleChange} required />
+                <label>Description</label>
+                <textarea name="description" value={withDefault(state.description, '')} onChange={handleChange} rows={3} />
+                <label>Tags (comma separated)</label>
+                <input name="tags" value={withDefault(state.tags, '')} onChange={handleChange} placeholder="python, api" />
+                <button className="button" type="submit">
+                  Save concept
+                </button>
+                {status && <span className="pill">{status}</span>}
+              </form>
+            );
+          case 'session':
+            return (
+              <form onSubmit={handleSubmit}>
+                <label>Session name</label>
+                <input name="name" value={withDefault(state.name, '')} onChange={handleChange} required />
+                <label>Description</label>
+                <textarea name="description" value={withDefault(state.description, '')} onChange={handleChange} rows={3} />
+                <label>Focus tags</label>
+                <input name="focus_tags" value={withDefault(state.focus_tags, '')} onChange={handleChange} placeholder="python, web" />
+                <label>Linked concepts</label>
+                <input name="linked_concepts" value={withDefault(state.linked_concepts, '')} onChange={handleChange} placeholder="Python, FastAPI" />
+                <button className="button" type="submit">
+                  Launch session
+                </button>
+                {status && <span className="pill">{status}</span>}
+              </form>
+            );
+          case 'curriculum':
+            return (
+              <form onSubmit={handleSubmit}>
+                <label>Title</label>
+                <input name="title" value={withDefault(state.title, '')} onChange={handleChange} required />
+                <label>Description</label>
+                <textarea name="description" value={withDefault(state.description, '')} onChange={handleChange} rows={3} />
+                <label>Tags</label>
+                <input name="tags" value={withDefault(state.tags, '')} onChange={handleChange} placeholder="fastapi, backend" />
+                <label>Source URL</label>
+                <input name="source_url" value={withDefault(state.source_url, '')} onChange={handleChange} placeholder="https://" />
+                <label>Linked concepts</label>
+                <input name="linked_concepts" value={withDefault(state.linked_concepts, '')} onChange={handleChange} />
+                <button className="button" type="submit">
+                  Upload curriculum
+                </button>
+                {status && <span className="pill">{status}</span>}
+              </form>
+            );
+          case 'share':
+            return (
+              <form onSubmit={handleSubmit}>
+                <label>Your handle</label>
+                <input name="author" value={withDefault(state.author, '')} onChange={handleChange} required />
+                <label>Title</label>
+                <input name="title" value={withDefault(state.title, '')} onChange={handleChange} required />
+                <label>Summary</label>
+                <textarea name="summary" value={withDefault(state.summary, '')} onChange={handleChange} rows={3} required />
+                <label>Tags</label>
+                <input name="tags" value={withDefault(state.tags, '')} onChange={handleChange} placeholder="brainstorm, ai" />
+                <label>Linked concepts</label>
+                <input name="linked_concepts" value={withDefault(state.linked_concepts, '')} onChange={handleChange} />
+                <label>Visibility</label>
+                <select name="visibility" value={withDefault(state.visibility, 'public')} onChange={handleChange}>
+                  <option value="public">Public</option>
+                  <option value="connections">Connections</option>
+                  <option value="private">Private</option>
+                </select>
+                {state.visibility === 'connections' ? (
+                  <React.Fragment>
+                    <label>Authorized handles</label>
+                    <input
+                      name="authorized_handles"
+                      value={withDefault(state.authorized_handles, '')}
+                      onChange={handleChange}
+                      placeholder="friend1, friend2"
+                    />
+                  </React.Fragment>
+                ) : null}
+                <button className="button" type="submit">
+                  Publish share
+                </button>
+                {status && <span className="pill">{status}</span>}
+              </form>
+            );
+          case 'quiz':
+            return (
+              <form onSubmit={handleSubmit}>
+                <label>Concept</label>
+                <input name="concept" value={withDefault(state.concept, '')} onChange={handleChange} placeholder="FastAPI" required />
+                <label>How many questions?</label>
+                <input name="count" type="number" min="1" max="10" value={withDefault(state.count, 3)} onChange={handleChange} />
+                <button className="button" type="submit">
+                  Generate quiz
+                </button>
+                {status && <span className="pill">{status}</span>}
+              </form>
+            );
+          default:
+            return null;
+        }
+      }
+
+      function App() {
+        const [chat, setChat] = useState([
+          {
+            role: 'assistant',
+            content: 'Welcome to the Wonder Knowledge conversational studio. Draft goals, drop resources, and I will sync the graph, quizzes, and knowledge shares for your crew.',
+            flair: 'Wonder Guide',
+            tags: ['start', 'overview'],
+            timestamp: new Date().toLocaleTimeString(),
+          },
+        ]);
+        const [input, setInput] = useState('');
+        const [activeTool, setActiveTool] = useState('concept');
+        const [handle, setHandle] = useState('wonder-team');
+        const [compareHandle, setCompareHandle] = useState('');
+        const [nodes, setNodes] = useState([]);
+        const [relationships, setRelationships] = useState([]);
+        const [sessions, setSessions] = useState([]);
+        const [curricula, setCurricula] = useState([]);
+        const [shares, setShares] = useState([]);
+        const [matches, setMatches] = useState([]);
+        const [quiz, setQuiz] = useState([]);
+        const [attachments, setAttachments] = useState([]);
+        const [comparison, setComparison] = useState(null);
+
+        const refreshGraph = async () => {
+          const [concepts, edges] = await Promise.all([
+            API.json('/knowledge'),
+            API.json('/relationships'),
+          ]);
+          setNodes(concepts);
+          setRelationships(edges);
+        };
+
+        const refreshSessions = async () => {
+          const list = await API.json('/sessions');
+          setSessions(list);
+        };
+
+        const refreshCurricula = async () => {
+          const list = await API.json('/curricula');
+          setCurricula(list);
+        };
+
+        const refreshShares = async (viewer = handle) => {
+          const query = viewer ? `?viewer=${encodeURIComponent(viewer)}` : '';
+          const list = await API.json(`/shares${query}`);
+          setShares(list);
+        };
+
+        const refreshMatches = async (viewer = handle) => {
+          if (!viewer) {
+            setMatches([]);
+            return;
+          }
+          try {
+            const list = await API.json(`/shares/matchups?viewer=${encodeURIComponent(viewer)}&limit=6`);
+            setMatches(list);
+          } catch (error) {
+            setMatches([]);
+          }
+        };
+
+        useEffect(() => {
+          refreshGraph();
+          refreshSessions();
+          refreshCurricula();
+          refreshShares();
+          refreshMatches();
+        }, []);
+
+        useEffect(() => {
+          refreshShares(handle);
+          refreshMatches(handle);
+          if (compareHandle) {
+            API.json(`/shares/compare?handle_a=${encodeURIComponent(handle)}&handle_b=${encodeURIComponent(compareHandle)}`)
+              .then(setComparison)
+              .catch(() => setComparison(null));
+          }
+        }, [handle, compareHandle]);
+
+        const pushMessage = (role, content, extras = {}) => {
+          setChat((prev) => [
+            ...prev,
+            {
+              role,
+              content,
+              timestamp: new Date().toLocaleTimeString(),
+              ...extras,
+            },
+          ]);
+        };
+
+        const handleComposerSend = async () => {
+          if (!input.trim()) return;
+          const outgoing = input.trim();
+          pushMessage('user', outgoing, { flair: 'You', tags: ['prompt'] });
+          setInput('');
+          pushMessage('assistant', 'Noted. I will weave this into your workspace. Pick a tool to continue, or draft a share so teammates stay in sync.', {
+            flair: 'Wonder Guide',
+            tags: ['ack'],
+          });
+        };
+
+        const handleConcept = async (payload) => {
+          const body = {
+            name: payload.name,
+            description: payload.description,
+            tags: (payload.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+          };
+          await API.json('/knowledge', { method: 'POST', body: JSON.stringify(body) });
+          pushMessage('assistant', `Concept “${payload.name}” saved and ready for learning paths.`, {
+            flair: 'Graph Sync',
+            tags: body.tags,
+          });
+          refreshGraph();
+        };
+
+        const handleSession = async (payload) => {
+          const body = {
+            name: payload.name,
+            description: payload.description,
+            focus_tags: (payload.focus_tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+            linked_concepts: (payload.linked_concepts || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+          };
+          await API.json('/sessions', { method: 'POST', body: JSON.stringify(body) });
+          pushMessage('assistant', `Learning session “${payload.name}” launched. Let’s focus on ${body.focus_tags.join(', ')}.`, {
+            flair: 'Session Coach',
+            tags: body.focus_tags,
+          });
+          refreshSessions();
+        };
+
+        const handleCurriculum = async (payload) => {
+          const body = {
+            title: payload.title,
+            description: payload.description,
+            tags: (payload.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+            source_url: payload.source_url,
+            linked_concepts: (payload.linked_concepts || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+          };
+          await API.json('/curricula', { method: 'POST', body: JSON.stringify(body) });
+          pushMessage('assistant', `Curriculum “${payload.title}” uploaded. I’ll align it with the graph and sessions.`, {
+            flair: 'Curriculum Curator',
+            tags: body.tags,
+          });
+          refreshCurricula();
+        };
+
+        const handleShare = async (payload) => {
+          const body = {
+            author: payload.author,
+            title: payload.title,
+            summary: payload.summary,
+            tags: (payload.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+            linked_concepts: (payload.linked_concepts || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+            visibility: payload.visibility || 'public',
+            authorized_handles: (payload.authorized_handles || '')
+              .split(',')
+              .map((tag) => tag.trim().toLowerCase())
+              .filter(Boolean),
+          };
+          await API.json('/shares', { method: 'POST', body: JSON.stringify(body) });
+          pushMessage('assistant', `Published “${payload.title}”. Collaborators can now skim your thinking.`, {
+            flair: 'Idea Beacon',
+            tags: body.tags,
+          });
+          refreshShares(handle);
+          refreshMatches(handle);
+        };
+
+        const handleQuiz = async (payload) => {
+          const body = {
+            concept: payload.concept,
+            count: Number(withDefault(payload.count, 3)),
+          };
+          const result = await API.json('/quizzes/generate', { method: 'POST', body: JSON.stringify(body) });
+          setQuiz(result.questions);
+          pushMessage('assistant', `Generated ${result.questions.length} quiz prompts for ${payload.concept}.`, {
+            flair: 'Quiz Master',
+            tags: [payload.concept],
+          });
+        };
+
+        const handleAttachmentChange = (event) => {
+          const files = Array.from(event.target.files || []);
+          if (!files.length) return;
+          setAttachments((prev) => [...prev, ...files.map((file) => file.name)]);
+          pushMessage('assistant', `Attachment received (${files.length}). I’ll reference it in our study trail.`, {
+            flair: 'Notebook',
+            tags: ['attachment'],
+          });
+        };
+
+        const handleQuizAttempt = async (question, index) => {
+          const result = await API.json('/quizzes/attempt', {
+            method: 'POST',
+            body: JSON.stringify({ question_id: question.id, selected_index: index }),
+          });
+          pushMessage('assistant', `${result.correct ? '✅ Correct!' : 'Try again!'} ${result.explanation}`, {
+            flair: 'Quiz Master',
+            tags: [question.concept],
+          });
+        };
+
+        const tools = {
+          concept: {
+            title: 'Add concept',
+            description: 'Expand the knowledge base with a new concept or skill.',
+            action: handleConcept,
+          },
+          session: {
+            title: 'Learning session',
+            description: 'Spin up a focused series for a topic or crew.',
+            action: handleSession,
+          },
+          curriculum: {
+            title: 'Curriculum upload',
+            description: 'Pin lecture notes or a syllabus to the map.',
+            action: handleCurriculum,
+          },
+          share: {
+            title: 'Knowledge share',
+            description: 'Publish a thought snapshot so collaborators stay aligned.',
+            action: handleShare,
+          },
+          quiz: {
+            title: 'Generate quiz',
+            description: 'Check your understanding in the moment.',
+            action: handleQuiz,
+          },
+        };
+
+        return (
+          <div className="workspace">
+            <aside className="panel sidebar-left">
+              <div className="panel-header">
+                <h2>Toolbox</h2>
+                <p style={{ color: 'var(--muted)', fontSize: '13px' }}>
+                  Tap a tool to keep the chat, sessions, and map in sync. Works great on the go.
+                </p>
+              </div>
+              <div className="panel-body">
+                <MobileBanner />
+                <div className="tool-grid">
+                  {Object.entries(tools).map(([key, value]) => (
+                    <div key={key} className="tool-card" onClick={() => setActiveTool(key)}>
+                      <h4>{value.title}</h4>
+                      <p>{value.description}</p>
+                      {activeTool === key ? <span className="pill">Active</span> : null}
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <h3 style={{ marginBottom: '12px' }}>Active tool</h3>
+                  <ToolForm type={activeTool} onSubmit={tools[activeTool].action} />
+                </div>
+              </div>
+            </aside>
+
+            <section className="panel chat-panel">
+              <div className="panel-header">
+                <h2>Conversation</h2>
+                <p style={{ color: 'var(--muted)', fontSize: '13px' }}>
+                  Wonder Knowledge follows ChatGPT-inspired patterns so GPT-style agents (and you) can steer the
+                  workspace via MCP actions.
+                </p>
+              </div>
+              <div className="panel-body">
+                <div className="chat-stream">
+                  {chat.map((entry, index) => (
+                    <ChatMessage key={index} entry={entry} />
+                  ))}
+                </div>
+                <div className="section-title">Knowledge map</div>
+                <KnowledgeTree nodes={nodes} relationships={relationships} />
+                <div className="section-title">Quick quiz cards</div>
+                <div className="scroll-stack">
+                  {quiz.map((question) => (
+                    <div key={question.id} className="share-card">
+                      <strong>{question.prompt}</strong>
+                      {question.choices.map((choice, index) => (
+                        <button
+                          key={index}
+                          className="button secondary"
+                          onClick={() => handleQuizAttempt(question, index)}
+                          style={{ textAlign: 'left' }}
+                        >
+                          {choice}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                  {!quiz.length && <p style={{ color: 'var(--muted)' }}>Generate a quiz to warm up.</p>}
+                </div>
+              </div>
+              <div className="composer">
+                <textarea
+                  placeholder="Ask the studio to plan your next sprint or summarise today’s notes..."
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                />
+                <div className="attachment-wrapper">
+                  <div className="attachment-box">
+                    <span>Drop photos, PDFs, or audio here (stored locally for now)</span>
+                    <input type="file" multiple onChange={handleAttachmentChange} />
+                  </div>
+                </div>
+                {attachments.length ? (
+                  <div className="attachment-list">
+                    {attachments.map((file, index) => (
+                      <span key={`${file}-${index}`} className="attachment-chip">
+                        {file}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="composer-actions">
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <label style={{ margin: 0 }}>Your handle</label>
+                    <input
+                      style={{ width: '140px' }}
+                      value={handle}
+                      onChange={(event) => setHandle(event.target.value.toLowerCase())}
+                      placeholder="handle"
+                    />
+                  </div>
+                  <button className="button" onClick={handleComposerSend} type="button">
+                    Send
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <aside className="panel sidebar-right light">
+              <div className="panel-header">
+                <h2>Study cockpit</h2>
+                <p style={{ color: '#4b5563', fontSize: '13px' }}>
+                  Monitor sessions, curricula, and social idea flow for fast catch-ups.
+                </p>
+              </div>
+              <div className="panel-body" style={{ color: '#1f2937' }}>
+                <div>
+                  <h3>Sessions</h3>
+                  <SessionPanel sessions={sessions} />
+                </div>
+                <div>
+                  <h3>Curricula</h3>
+                  <CurriculumPanel curricula={curricula} />
+                </div>
+                <div>
+                  <h3>Shares</h3>
+                  <SharePanel shares={shares} />
+                </div>
+                <div>
+                  <h3>Matches</h3>
+                  <MatchPanel matches={matches} />
+                </div>
+                <div>
+                  <h3>Compare handles</h3>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      style={{ background: 'rgba(255,255,255,0.8)', color: '#1f2937' }}
+                      placeholder="collaborator"
+                      value={compareHandle}
+                      onChange={(event) => setCompareHandle(event.target.value.toLowerCase())}
+                    />
+                    <button
+                      className="button secondary"
+                      type="button"
+                      onClick={() => {
+                        if (compareHandle) {
+                          API.json(
+                            `/shares/compare?handle_a=${encodeURIComponent(handle)}&handle_b=${encodeURIComponent(compareHandle)}`
+                          )
+                            .then(setComparison)
+                            .catch(() => setComparison(null));
+                        }
+                      }}
+                    >
+                      Compare
+                    </button>
+                  </div>
+                  {comparison ? (
+                    <div className="share-card" style={{ marginTop: '10px' }}>
+                      <strong>Shared ground</strong>
+                      <div className="match-tags">
+                        {comparison.shared_tags.map((tag) => (
+                          <span key={`shared-${tag}`}>#{tag}</span>
+                        ))}
+                      </div>
+                      <strong>Unique sparks</strong>
+                      <div className="match-tags">
+                        {comparison.divergent_tags.map((tag) => (
+                          <span key={`div-${tag}`}>#{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                      Pick a collaborator to see overlaps and differences.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>
