@@ -4,6 +4,7 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.api.schemas import (
     CurriculumResponse,
@@ -33,7 +34,11 @@ from app.core.graph import KnowledgeGraph, KnowledgeNode
 app = FastAPI(title="Wonder Knowledge", description="Prototype knowledge mapping assistant")
 
 graph = KnowledgeGraph()
-FRONTEND_INDEX = Path(__file__).resolve().parent / "frontend" / "index.html"
+FRONTEND_DIR = Path(__file__).resolve().parent / "frontend" / "dist"
+FRONTEND_INDEX = FRONTEND_DIR / "index.html"
+
+if (FRONTEND_DIR / "assets").exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIR / "assets"), name="assets")
 
 
 def seed_graph() -> None:
